@@ -11,6 +11,7 @@ var usersRouter = require('./routes/users');
 var flash = require('connect-flash');
 
 var app = express();
+var apiUrl = process.env.API_BASE_URL;
 
 app.use((req, res, next) => {
   if (req.method === 'OPTIONS') {
@@ -52,7 +53,7 @@ var jwt = require('jsonwebtoken');
 
 app.post('/login', function(req, res) {
 
-  axios.post('http://localhost:3000/auth/login', req.body)
+  axios.post(`${apiUrl}auth/login`, req.body)
   .then(function(response) {      
       var decodedToken = jwt.decode(response.data.accessToken);
       var sub = decodedToken.sub; // Subject (typically user id)
@@ -61,7 +62,7 @@ app.post('/login', function(req, res) {
       req.session.sub = sub;      
       req.session.accessToken = response.data.accessToken;
       // Make another request to a different endpoint
-      return axios.get(`http://localhost:3000/users/${sub}`, {
+      return axios.get(`${apiUrl}users/${sub}`, {
         headers: {
           'Authorization': `Bearer ${ response.data.accessToken }`
         }
@@ -85,6 +86,25 @@ app.post('/login', function(req, res) {
   });
 });
 
+
+app.post('/signup', function(req, res) {
+  var userId = req.session._id; 
+  var { email, firstName, lastName, password } = req.body;  
+  var newUser = { email, firstName, lastName, password };   
+  console.log('newUser:', newUser); 
+  axios.post(`${apiUrl}users/register`, newUser, {
+    headers: {
+      'Content-Type': 'application/json' 
+    }
+  })
+  .then(function(response) {      
+    res.redirect('/login');      
+  })
+  .catch(function(error) {
+      console.log("Response Error API:", error.response.data.message);       
+      res.render('signup', { errorMessage: error.response.data.message });      
+  });
+});
 
 app.get('/', function(req, res) {
   res.render('index', { firstName: req.session.firstName });
@@ -111,7 +131,7 @@ app.post('/update-profile', async function(req, res, next) {
     if (password && password.trim() !== '') {
       updateData.password = password;
     }    
-    axios.put(`http://localhost:3000/users/${userId}`, updateData, {
+    axios.put(`${apiUrl}users/${userId}`, updateData, {
       headers: {
         'Authorization': `Bearer ${ req.session.accessToken }`
       }
@@ -131,10 +151,9 @@ app.post('/update-profile', async function(req, res, next) {
   }
 });
 
-
 app.get('/delete', function(req, res) {
   var userId = req.session._id;
-  axios.delete(`http://localhost:3000/users/${userId}`, {
+  axios.delete(`${apiUrl}users/${userId}`, {
       headers: {
         'Authorization': `Bearer ${ req.session.accessToken }`
       }

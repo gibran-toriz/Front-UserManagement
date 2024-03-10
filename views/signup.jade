@@ -44,8 +44,9 @@ block content
                 svg.bi.bi-person(xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' fill='currentColor' viewBox='0 0 16 16')
                   path(d='M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z').
 
-              p#message    
-              form(id='signupForm' data-bs-theme='light')              
+              if errorMessage                
+                p#message #{errorMessage}         
+              form(method='POST' data-bs-theme='light' action='/signup')              
                 .row
                   .col
                     .mb-3
@@ -69,47 +70,6 @@ block content
   
 
   script.
-      document.addEventListener("DOMContentLoaded", function() {
-        const signupForm = document.getElementById('signupForm'); 
-        signupForm.addEventListener("submit", function(event) {
-          event.preventDefault(); 
-          
-          var form = event.target;
-          var data = {
-            email: form.elements.email.value,
-            firstName: form.elements.firstName.value,
-            password: form.elements.password.value,            
-            lastName: form.elements.lastName.value,
-            // add other form fields here
-          };
-          
-            var messageElement = document.getElementById('message');
-            
-            axios.post('http://localhost:3000/users/register', form, {
-              headers: {
-                'Content-Type': 'application/json' // Explicitly specify the content type
-              }
-            })
-            .then(function (response) {
-              console.log(response);     
-              document.getElementById('message').textContent = 'Registration successful! Redirecting to login page...';
-              messageElement.classList.add('text-success');
-              messageElement.classList.remove('text-danger');
-              document.getElementById('message').classList.add('text-success');
-              setTimeout(function() {
-                window.location.href = '/login';
-              }, 2000); // Redirect after 2 seconds
-            })
-            .catch(function (error) {
-              console.log(error);   
-              var messageElement = document.getElementById('message');
-              messageElement.classList.remove('text-success');
-              messageElement.classList.add('text-danger');
-              if (error.response && error.response.data) {
-                messageElement.textContent = error.response.data.message;
-              } else {
-                messageElement.textContent = 'Registration failed. Please try again.';
-              } 
-            });
-        });
-      });
+      var messageElement = document.getElementById('message');
+      messageElement.classList.remove('text-success');
+      messageElement.classList.add('text-danger');

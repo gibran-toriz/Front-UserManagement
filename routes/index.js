@@ -28,7 +28,8 @@ router.get('/signup', function(req, res, next) {
   _id: req.session._id, 
   firstName: req.session.firstName,
   lastName: req.session.lastName,
-  email: req.session.email,});
+  email: req.session.email,
+  errorMessage: req.session.errorMessage,});
 });
 
 /* GET contacts page. */
