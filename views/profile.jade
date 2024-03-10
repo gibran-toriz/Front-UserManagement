@@ -21,12 +21,14 @@ block content
             a.nav-link(href='/team') Team
           li.nav-item
             a.nav-link(href='/contacts') Contacts
-          li.nav-item
-            a.nav-link.active(href='/profile') Profile
-          li.nav-item
-            a.nav-link(href='/') Log out
-          li.nav-item
-            a.nav-link(href='/login') Log in
+          if firstName           
+            li.nav-item
+              a.nav-link.active(href='/profile') Profile
+            li.nav-item
+              a.nav-link(href='/logout') Log out        
+          if !firstName
+            li.nav-item
+              a.nav-link(href='/login') Log in
   //  End: Navbar Centered Links 
   section.py-5
     .container.py-5(style='margin-top: -81px;')
@@ -41,24 +43,40 @@ block content
               .bs-icon-xl.bs-icon-circle.bs-icon-primary.shadow.bs-icon.my-4(style='margin-bottom: -5px;margin-top: 106px;padding-bottom: 0px;')
                 svg.bi.bi-person(xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' fill='currentColor' viewBox='0 0 16 16')
                   path(d='M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z').
-                    
-                    
-              form(method='post' data-bs-theme='light')
+                                
+              if successMesage                
+                p#message #{successMesage}                                
+              form(method='post', action='/update-profile', data-bs-theme='light')
                 .row
                   .col
                     .mb-3
                       p.text-muted(style='margin-top: -1px;')
-                        span(style='color: rgb(45, 45, 45);') joedoe@email.com
+                        span(style='color: rgb(45, 45, 45);') #{email}
                 .row
                   .col
                     .mb-3
-                      input.form-control(type='text' placeholder='First name' name='firstname' style='margin-bottom: 0px;')
+                      input.form-control(type='text' value=firstName placeholder='First name' name='firstName' style='margin-bottom: 0px;')
                     .mb-3
                       input.form-control(type='password' name='password' placeholder='Password')
                   .col
                     .mb-3
-                      input.form-control(type='text' placeholder='Last name' name='lastname' style='margin-bottom: 0px;')
+                      input.form-control(type='text' value=lastName placeholder='Last name' name='lastName' style='margin-bottom: 0px;')
                     .mb-3
-                      input.form-control(type='password' name='password' placeholder='Confirm Password')
+                      input.form-control(type='password' name='confirmPassword' placeholder='Confirm Password')
                 .mb-3
                   button.btn.btn-primary.shadow.d-block.w-100(type='submit') Update
+                  p.text-muted(style='margin-top: 20px;')
+                    | 
+                    a(href='/delete') Delete account 
+
+  script.    
+    var message = document.getElementById('message');    
+    if ( message != null ) {
+      var messageElement = document.getElementById('message');    
+      if ( message.textContent.includes('Failed') ) { 
+        messageElement.classList.add('text-danger');
+      } else {
+        messageElement.classList.add('text-success');
+      }
+    }    
+    

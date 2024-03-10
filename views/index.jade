@@ -21,13 +21,30 @@ block content
             a.nav-link(href='/team') Team
           li.nav-item
             a.nav-link(href='/contacts') Contacts
-          li.nav-item
-            a.nav-link(href='/profile') Profile
-          li.nav-item
-            a.nav-link(href='/') Log out
-          li.nav-item
-            a.nav-link(href='/login') Log in
+          if firstName
+            li.nav-item
+              a.nav-link(href='/profile') Profile
+            li.nav-item
+              a.nav-link(href='/logout') Log out            
+          if !firstName
+            li.nav-item
+              a.nav-link(href='/login') Log in
+
   //  End: Navbar Centered Links 
+
+  style.
+    .welcome-message {
+      text-align: right;
+      color: #333;
+      font-size: 20px;
+      font-family: Roboto, sans-serif;
+    }
+  
+  if firstName  
+    p.welcome-message.fw-bold.text-success.mb-2 Welcome, #{firstName}!
+  else
+    p.welcome-message.fw-bold.text-primary.card-text.mb-2 You are not logged in.    
+
   header.bg-primary-gradient
     //  Start: Hero Clean Reverse 
     .container.pt-4.pt-xl-5

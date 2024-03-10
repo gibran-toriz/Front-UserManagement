@@ -1,6 +1,6 @@
 extends layout
 
-block content
+block content  
   //  Start: Navbar Centered Links 
   nav.navbar.navbar-expand-md.sticky-top.navbar-shrink.py-3.navbar-light#mainNav
     .container
@@ -21,10 +21,11 @@ block content
             a.nav-link(href='/team') Team
           li.nav-item
             a.nav-link(href='/contacts') Contacts
-          li.nav-item
-            a.nav-link(href='/profile') Profile
-          li.nav-item
-            a.nav-link(href='/') Log out
+          if firstName
+            li.nav-item
+              a.nav-link(href='/profile') Profile
+            li.nav-item
+              a.nav-link(href='/logout') Log out                   
           li.nav-item
             a.nav-link.active(href='/login') Log in
   //  End: Navbar Centered Links 
@@ -40,10 +41,11 @@ block content
             .card-body.text-center.d-flex.flex-column.align-items-center(style='margin-top: -31px;padding-top: 0px;')
               .bs-icon-xl.bs-icon-circle.bs-icon-primary.shadow.bs-icon.my-4
                 svg.bi.bi-person(xmlns='http://www.w3.org/2000/svg' width='1em' height='1em' fill='currentColor' viewBox='0 0 16 16')
-                  path(d='M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z').
-                    
-                    
-              form(method='post' data-bs-theme='light')
+                  path(d='M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z').                          
+
+              if errorMessage                
+                p#message    
+              form(method='POST' data-bs-theme='light' action='/login')
                 .mb-3
                   input.form-control(type='email' name='email' placeholder='Email')
                 .mb-3
@@ -53,6 +55,7 @@ block content
                   p.text-muted(style='margin-top: 20px;')
                     | Do not have an account? 
                     a(href='/signup') Sign up
+
   //  Start: Footer Multi Column 
   footer.bg-primary-gradient
     .container.py-4.py-lg-5
@@ -90,4 +93,12 @@ block content
             li
               a(href='#') Benefits
         //  End: Careers 
-        
+
+
+
+  script.
+    var message = document.getElementById('message');    
+    if ( message != null ) {
+       document.getElementById('message').textContent = 'Invalid email or password.';    
+       message.classList.add('text-danger');    
+    }    

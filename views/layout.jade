@@ -6,6 +6,9 @@ html(data-bs-theme='light' lang='en')
     title= title
     link(rel='stylesheet' href='/bootstrap/css/bootstrap.min.css?h=996dc642b1d24f33bd052ed328aa38bc')
     link(rel='stylesheet' href='/css/styles.min.css?h=657dc55e02c9fc891c533d75d508fcb9')
-  body
+    script(src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js")        
+    script(src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js")
+
+  body  
     block content
     include footer.jade

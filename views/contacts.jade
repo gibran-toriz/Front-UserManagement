@@ -20,13 +20,15 @@ block content
           li.nav-item
             a.nav-link(href='/team') Team
           li.nav-item
-            a.nav-link.active(href='/contacts') Contacts
-          li.nav-item
-            a.nav-link(href='/profile') Profile
-          li.nav-item
-            a.nav-link(href='/') Log out
-          li.nav-item
-            a.nav-link(href='/login') Log in
+            a.nav-link.active(href='/contacts') Contacts          
+          if firstName
+            li.nav-item
+              a.nav-link(href='/profile') Profile
+            li.nav-item
+              a.nav-link(href='/logout') Log out         
+          if !firstName
+            li.nav-item
+              a.nav-link(href='/login') Log in
   //  End: Navbar Centered Links 
   //  Start: Contact Details 
   section.py-5
