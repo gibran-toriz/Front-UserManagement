@@ -1,32 +1,58 @@
-# CryptoPayroll application 
+# Project Name
 
-## Overview
+## Description
 
-This repository contains a Node.js project of a company site, allowing user to register and login.
+This project is a web application for user management. Users can sign up, log in, and manage their account information.
 
-## Prerequisites
+## Installation
 
-- Node.js 18
+1. Clone the repository:
 
-## Dependencies
+```bash
+git clone https://github.com/gibran-toriz/Front-UserManagement.git
+```
 
-- axios 1.6.2
-- cookie-parser 1.4.4
-- debug 2.6.9
-- dotenv 16.3.1
-- ejs 2.6.1
-- express 4.16.1
-- http-errors 1.6.3
-- morgan 1.9.1
-- web3 4.3.0
+2. Navigate to the project directory:
+
+
+```bash
+cd yourrepository
+````
+
+3. Install the dependencies:
+
+```bash
+npm install
+````
+
 
 ## Usage
 
-1. **Build**
-   ```bash
-   npm install
-   ```
-2. **Run locally**
-   ```bash
-   npm start
-   ```
+1. Start the server:
+
+```bash
+npm start
+````
+
+2. Open your web browser and navigate to `http://localhost:3000`.
+
+## Features
+
+- User registration
+- User login
+- Profile
+
+## Technologies Used
+
+- Node.js
+- Express.js
+- Jade/Pug
+- Axios
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## License
+
+[MIT]
