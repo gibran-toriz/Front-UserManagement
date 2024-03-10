@@ -1,188 +1,55 @@
-var session = require('express-session');
-var createError = require('http-errors');
 var express = require('express');
+var createError = require('http-errors');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var session = require('express-session');
+var flash = require('connect-flash');
 require('dotenv').config();
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var flash = require('connect-flash');
+var authController = require('./controllers/authController');
 
 var app = express();
-var apiUrl = process.env.API_BASE_URL;
 
-app.use((req, res, next) => {
-  if (req.method === 'OPTIONS') {
-    // Set CORS headers here if you're handling pre-flight manually
-    res.setHeader('Access-Control-Allow-Origin', '*'); // Or a specific origin
-    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    return res.sendStatus(200); // Short-circuit pre-flight request
-  }
-  next();
-});
-
-app.use(flash());
-
-app.use(session({
-  secret: 'UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw',
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: false } // `secure: true` en producción si estás usando HTTPS
-}));
-
-// view engine setup
+// Application setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(flash());
+app.use(session({
+  secret: 'UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7W0Q5nw',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // Use `secure: true` in production with HTTPS
+}));
 
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+// Route setup
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
 // Route handlers
-
-var axios = require('axios'); 
-var https = require('https');
-
-var axiosInstance = axios.create({
-  httpsAgent: new https.Agent({  
-    rejectUnauthorized: false 
-  })
-});
-
-var jwt = require('jsonwebtoken');
-
-app.post('/login', function(req, res) {
-
-  axiosInstance.post(`${apiUrl}auth/login`, req.body)
-  .then(function(response) {      
-      var decodedToken = jwt.decode(response.data.accessToken);
-      var sub = decodedToken.sub; // Subject (typically user id)
-      var firstName = decodedToken.firstName; // Assuming firstName is part of the token payload    
-      // Saving information in session
-      req.session.sub = sub;      
-      req.session.accessToken = response.data.accessToken;
-      // Make another request to a different endpoint
-      return axiosInstance.get(`${apiUrl}users/${sub}`, {
-        headers: {
-          'Authorization': `Bearer ${ response.data.accessToken }`
-        }
-      });                           
-  }).then(function (response) {      
-      req.session.firstName = response.data.firstName;
-      req.session.lastName = response.data.lastName;
-      req.session.email = response.data.email;
-      req.session._id = response.data._id;           
-      req.session.save(function(err) {        
-        if (err) {
-          console.error(err);          
-        } else {
-          res.redirect('/');
-        }
-      });
-  })
-  .catch(function(error) {
-      console.log("Response Error API:", error.message);
-      res.render('login', { errorMessage: 'Invalid email or password.' });      
-  });
-});
-
-
-app.post('/signup', function(req, res) {
-  var userId = req.session._id; 
-  var { email, firstName, lastName, password } = req.body;  
-  var newUser = { email, firstName, lastName, password };   
-  console.log('newUser:', newUser); 
-  axiosInstance.post(`${apiUrl}users/register`, newUser, {
-    headers: {
-      'Content-Type': 'application/json' 
-    }
-  })
-  .then(function(response) {      
-    res.redirect('/login');      
-  })
-  .catch(function(error) {
-      console.log("Response Error API:", error.response.data.message);       
-      res.render('signup', { errorMessage: error.response.data.message });      
-  });
-});
-
-app.get('/', function(req, res) {
-  res.render('index', { firstName: req.session.firstName });
-});
-
-
-app.get('/logout', function(req, res) {
-  req.session.destroy(function(err) {
-      if(err) {
-          console.log(err);
-          res.send("Session could not be destroyed.");
-      } else {
-          res.redirect('/login');
-      }
-  });
-});
-
-
-app.post('/update-profile', async function(req, res, next) {
-  try {    
-    var userId = req.session._id; 
-    var { firstName, lastName, password } = req.body;
-    var updateData = { firstName, lastName };    
-    if (password && password.trim() !== '') {
-      updateData.password = password;
-    }    
-    axiosInstance.put(`${apiUrl}users/${userId}`, updateData, {
-      headers: {
-        'Authorization': `Bearer ${ req.session.accessToken }`
-      }
-    }).then(function(response) {             
-      req.session.firstName = response.data.firstName;
-      req.session.lastName = response.data.lastName;  
-      req.session.successMesage = 'Ok! Profile updated.';
-      res.redirect('/profile');
-    }).catch(function(error) {
-      console.log("Response Error API:", error.message);      
-      req.session.successMesage = 'Failed to update profile.';
-      res.redirect('/profile');
-    });    
-  } catch (error) {
-    console.error('Failed to update user data:', error);
-    res.render('profile', { errorMessage: 'Failed to update profile.', userData: req.body });
-  }
-});
-
-app.get('/delete', function(req, res) {
-  var userId = req.session._id;
-  axiosInstance.delete(`${apiUrl}users/${userId}`, {
-      headers: {
-        'Authorization': `Bearer ${ req.session.accessToken }`
-      }
-    }).then(function(response) {             
-      req.session.destroy(function(err) {
-        if(err) {
-            console.log(err);
-            res.send("Session could not be destroyed.");
-        } else {
-            res.redirect('/login');
-        }
-        });      
-    }).catch(function(error) {
-      console.log("Response Error API:", error.message);      
-      req.session.successMesage = error.message;
-      res.redirect('/profile');
-    });      
-});
-
-
-
+app.post('/login', authController.loginHandler);
+app.post('/signup', authController.signUpHandler);
+app.get('/logout', authController.logoutHandler);
+app.post('/update-profile', authController.updateProfileHandler);
+app.get('/delete', authController.deleteAccountHandler);
+app.get('/', function(req, res) {res.render('index', { firstName: req.session.firstName });});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -191,13 +58,12 @@ app.use(function(req, res, next) {
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
   res.status(err.status || 500);
   res.render('error');
 });
 
 module.exports = app;
+
+
