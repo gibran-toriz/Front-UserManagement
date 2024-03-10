@@ -49,11 +49,19 @@ app.use('/users', usersRouter);
 // Route handlers
 
 var axios = require('axios'); 
+var https = require('https');
+
+var axiosInstance = axios.create({
+  httpsAgent: new https.Agent({  
+    rejectUnauthorized: false 
+  })
+});
+
 var jwt = require('jsonwebtoken');
 
 app.post('/login', function(req, res) {
 
-  axios.post(`${apiUrl}auth/login`, req.body)
+  axiosInstance.post(`${apiUrl}auth/login`, req.body)
   .then(function(response) {      
       var decodedToken = jwt.decode(response.data.accessToken);
       var sub = decodedToken.sub; // Subject (typically user id)
@@ -62,7 +70,7 @@ app.post('/login', function(req, res) {
       req.session.sub = sub;      
       req.session.accessToken = response.data.accessToken;
       // Make another request to a different endpoint
-      return axios.get(`${apiUrl}users/${sub}`, {
+      return axiosInstance.get(`${apiUrl}users/${sub}`, {
         headers: {
           'Authorization': `Bearer ${ response.data.accessToken }`
         }
@@ -92,7 +100,7 @@ app.post('/signup', function(req, res) {
   var { email, firstName, lastName, password } = req.body;  
   var newUser = { email, firstName, lastName, password };   
   console.log('newUser:', newUser); 
-  axios.post(`${apiUrl}users/register`, newUser, {
+  axiosInstance.post(`${apiUrl}users/register`, newUser, {
     headers: {
       'Content-Type': 'application/json' 
     }
@@ -131,7 +139,7 @@ app.post('/update-profile', async function(req, res, next) {
     if (password && password.trim() !== '') {
       updateData.password = password;
     }    
-    axios.put(`${apiUrl}users/${userId}`, updateData, {
+    axiosInstance.put(`${apiUrl}users/${userId}`, updateData, {
       headers: {
         'Authorization': `Bearer ${ req.session.accessToken }`
       }
@@ -153,7 +161,7 @@ app.post('/update-profile', async function(req, res, next) {
 
 app.get('/delete', function(req, res) {
   var userId = req.session._id;
-  axios.delete(`${apiUrl}users/${userId}`, {
+  axiosInstance.delete(`${apiUrl}users/${userId}`, {
       headers: {
         'Authorization': `Bearer ${ req.session.accessToken }`
       }
